@@ -2,6 +2,7 @@
 	"name": "abrahan-zarza/dbm",
 	"description": "Manage database simple",
 	"type": "package",
+	"license": "MIT",
 	"authors": [
         {
             "name": "Abrahan Zarza",
