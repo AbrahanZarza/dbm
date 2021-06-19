@@ -1,0 +1,16 @@
+{
+	"name": "abrahan-zarza/dbm",
+	"description": "Manage database simple",
+	"type": "package",
+	"authors": [
+        {
+            "name": "Abrahan Zarza",
+            "email": "abrahan.azr@gmail.com",
+            "homepage": "https://abrahanzarza.com",
+            "role": "Maintainer"
+        }
+    ],
+	"require": {
+		"vlucas/phpdotenv": "^5.2"
+	}
+}

@@ -22,10 +22,10 @@ final class DBInstance
             $password = $_ENV['DB_PASSWORD'];
             $databaseName = $_ENV['DB_NAME'];
 
-            $this->conn = new PDO("$db:host=$host;port=$port;dbname=$databaseName;charset=utf8", $user, $password, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            $this->conn = new \PDO("$db:host=$host;port=$port;dbname=$databaseName;charset=utf8", $user, $password, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             die($e->getMessage());
         }
     }
@@ -61,7 +61,7 @@ final class DBInstance
     {
         $stmt = $this->conn->prepare($query);
         $stmt->execute($bindParams);
-        $results = $singleRow ? $stmt->fetch(PDO::FETCH_ASSOC) : $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $singleRow ? $stmt->fetch(\PDO::FETCH_ASSOC) : $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         $stmt->closeCursor();
         if ($destroyInstance) $this->destroy();
