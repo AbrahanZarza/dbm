@@ -20,6 +20,18 @@ $_ENV['DB_PASSWORD'] = 'password';
 $_ENV['DB_NAME'] = 'database';
 ```
 
+O si lo prefieres, puedes crear un fichero `.env` en tu proyecto, con la siguiente estructura:
+```
+DB=database_type
+DB_HOST=address
+DB_PORT=port
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=database
+```
+
+Para más info de cómo cargar dicho fichero `.env` en tu aplicación, consultar la librería [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv).
+
 ### Instanciar una conexión
 ```
 $conn = \Dbm\Dbm::getInstance();
