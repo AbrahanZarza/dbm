@@ -1,7 +1,8 @@
 {
 	"name": "abrahan-zarza/dbm",
-	"description": "Manage database simple",
-	"type": "package",
+	"description": "Herramienta para realizar operaciones con bases de datos.",
+	"keywords": ["library", "php", "pdo", "mysql", "sql", "query"],
+	"type": "library",
 	"license": "MIT",
 	"authors": [
         {
@@ -13,5 +14,10 @@
     ],
 	"require": {
 		"vlucas/phpdotenv": "^5.2"
-	}
+	},
+    "autoload": {
+        "psr-4": {
+            "Dbm\\": "src"
+        }
+    }
 }

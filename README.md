@@ -4,7 +4,15 @@ Esta herramienta provee de mecanismos para conectarse a una base de datos y real
 Fue creada para ser empleada en proyectos web sencillos, pero también se puede usar como la capa de base de datos de una aplicación web más compleja.
 
 ## Instrucciones de uso
-Para empezar a usar Dbm hay que establecer los siguientes valores en las variables de entorno del proyecto:
+
+Instalamos la librería vía [composer](https://getcomposer.org/doc/) en nuestro proyecto:
+```
+composer require abrahan-zarza/dbm
+```
+
+```
+
+Posteriormente, debemos que establecer los siguientes valores en las variables de entorno del proyecto:
 ```
 $_ENV['DB'] = 'database_type';
 $_ENV['DB_HOST'] = 'address';
@@ -14,14 +22,9 @@ $_ENV['DB_PASSWORD'] = 'password';
 $_ENV['DB_NAME'] = 'database';
 ```
 
-Posteriormente, importamos la clase Dbm en nuestro script de php:
-```
-include_once 'path/Dbm.php';
-```
-
 ### Instanciar una conexión
 ```
-$conn = Dbm::getInstance();
+$conn = \Dbm\Dbm::getInstance();
 ```
 
 ### Cerrar una conexión

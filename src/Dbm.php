@@ -1,5 +1,7 @@
 <?php
 
+namespace Dbm;
+
 class Dbm
 {
     public static function getInstance()
