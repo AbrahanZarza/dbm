@@ -10,8 +10,6 @@ Instalamos la librería vía [composer](https://getcomposer.org/doc/) en nuestro
 composer require abrahan-zarza/dbm
 ```
 
-```
-
 Posteriormente, debemos que establecer los siguientes valores en las variables de entorno del proyecto:
 ```
 $_ENV['DB'] = 'database_type';
