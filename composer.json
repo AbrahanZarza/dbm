@@ -1,6 +1,6 @@
 {
-	"name": "abrahan-zarza/dbm",
-	"description": "Herramienta para realizar operaciones con bases de datos.",
+	"name": "abrahanzarza/dbm",
+	"description": "Tool for database querying in PHP projects.",
 	"keywords": ["library", "php", "pdo", "mysql", "sql", "query"],
 	"type": "library",
 	"license": "MIT",
@@ -13,11 +13,20 @@
         }
     ],
 	"require": {
-		"vlucas/phpdotenv": "^5.2"
+        "ext-pdo": "*",
+        "php": "^8.3"
 	},
+    "require-dev": {
+        "phpunit/phpunit": "^11.4"
+    },
     "autoload": {
         "psr-4": {
-            "Dbm\\": "src"
+            "AbrahanZarza\\Dbm\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AbrahanZarza\\Dbm\\Test\\": "test/"
         }
     }
 }
