@@ -1,73 +1,76 @@
 <?php
 
-namespace Dbm;
+declare(strict_types=1);
 
-class Dbm
+namespace AbrahanZarza\Dbm;
+
+use PDO;
+use PDOException;
+
+final readonly class Dbm
 {
-    public static function getInstance()
-    {
-        return new DBInstance();
-    }
-}
+    private const int FETCH_MODE = PDO::FETCH_ASSOC;
 
-final class DBInstance
-{
-    private $conn;
-
-    public function __construct()
-    {
-        try {
-            $db = $_ENV['DB'];
-            $host = $_ENV['DB_HOST'];
-            $port = $_ENV['DB_PORT'];
-            $user = $_ENV['DB_USER'];
-            $password = $_ENV['DB_PASSWORD'];
-            $databaseName = $_ENV['DB_NAME'];
-
-            $this->conn = new \PDO("$db:host=$host;port=$port;dbname=$databaseName;charset=utf8", $user, $password, [
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
-            ]);
-        } catch (\Exception $e) {
-            die($e->getMessage());
-        }
+    private function __construct(
+        private PDO $pdo,
+    ) {
     }
 
-    public function executeS(string $query, array $bindParams = null, bool $destroyInstance = true)
+    /** @throws PDOException */
+    public static function buildForSqlite(string $dbFilePath): self
     {
-        return $this->getResults($query, $bindParams, false, $destroyInstance);
+        $dsn = DsnBuilder::buildSqliteDsn($dbFilePath);
+
+        $pdo = new PDO($dsn, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+
+        return new self($pdo);
     }
 
-    public function getRow(string $query, array $bindParams = null, bool $destroyInstance = true)
-    {
-        return $this->getResults($query, $bindParams, true, $destroyInstance);
+    /**
+     * @throws ConnectionTypeException
+     * @throws PDOException
+     */
+    public static function build(
+        ConnectionType $type,
+        string $host,
+        int $port,
+        string $user,
+        string $password,
+        string $database,
+        string $charset = 'utf8mb4',
+    ): self {
+        $dsn = match ($type) {
+            ConnectionType::MYSQL => DsnBuilder::buildMysqlDsn($host, $port, $database, $charset),
+            ConnectionType::PGSQL => DsnBuilder::buildPgsqlDsn($host, $port, $database, $charset),
+            default => throw ConnectionTypeException::notAllowedConnectionType($type->value),
+        };
+
+        $pdo = new PDO($dsn, $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+
+        return new self($pdo);
     }
 
-    public function execute(string $query, array $bindParams = null, bool $destroyInstance = true)
+    public function read(string $query, array $parameters, bool $singleRow = false): string|array
     {
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($bindParams);
-        $lastInsertId = $this->conn->lastInsertId();
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($parameters);
+        $result = $singleRow
+            ? $stmt->fetch(self::FETCH_MODE)
+            : $stmt->fetchAll(self::FETCH_MODE);
 
         $stmt->closeCursor();
-        if ($destroyInstance) $this->destroy();
+
+        return $result;
+    }
+
+    public function write(string $query, array $parameters): false|string
+    {
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($parameters);
+        $lastInsertId = $this->pdo->lastInsertId();
+
+        $stmt->closeCursor();
 
         return $lastInsertId;
-    }
-
-    public function destroy()
-    {
-        $this->conn = null;
-    }
-
-    private function getResults(string $query, array $bindParams = null, bool $singleRow = false, bool $destroyInstance = true)
-    {
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($bindParams);
-        $results = $singleRow ? $stmt->fetch(\PDO::FETCH_ASSOC) : $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        $stmt->closeCursor();
-        if ($destroyInstance) $this->destroy();
-
-        return $results;
     }
 }
