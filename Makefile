@@ -12,10 +12,16 @@ composer-install:
 composer-update:
 	@$(COMPOSER_COMMAND) update --verbose
 
-test-coverage:
-	@$(RUN_COMMAND) php -dxdebug.mode=coverage ./vendor/bin/phpunit --color=always
-
 test-group:
-	@$(RUN_COMMAND) php ./vendor/bin/phpunit --no-coverage --color=always --group ${GROUP}
+	@docker compose exec dbm php /app/vendor/bin/phpunit --no-coverage --color=always --group ${GROUP}
+
+test-coverage:
+	@docker compose exec -e XDEBUG_MODE=coverage dbm php /app/vendor/bin/phpunit --color=always
 
 setup: build composer-install
+
+up:
+	@docker compose up
+
+down:
+	@docker compose down
