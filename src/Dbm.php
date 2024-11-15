@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AbrahanZarza\Dbm;
 
+use AbrahanZarza\Dbm\Connection\ConnectionType;
+use AbrahanZarza\Dbm\Connection\ConnectionTypeException;
+use AbrahanZarza\Dbm\Dsn\DsnBuilder;
 use PDO;
 use PDOException;
 
@@ -41,7 +44,7 @@ final readonly class Dbm
     ): self {
         $dsn = match ($type) {
             ConnectionType::MYSQL => DsnBuilder::buildMysqlDsn($host, $port, $database, $charset),
-            ConnectionType::PGSQL => DsnBuilder::buildPgsqlDsn($host, $port, $database, $charset),
+            ConnectionType::PGSQL => DsnBuilder::buildPgsqlDsn($host, $port, $database),
             default => throw ConnectionTypeException::notAllowedConnectionType($type->value),
         };
 
@@ -50,24 +53,22 @@ final readonly class Dbm
         return new self($pdo);
     }
 
-    public function read(string $query, array $parameters, bool $singleRow = false): string|array
+    public function read(string $query, array $parameters = [], bool $singleRow = false): string|array
     {
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($parameters);
-        $result = $singleRow
-            ? $stmt->fetch(self::FETCH_MODE)
-            : $stmt->fetchAll(self::FETCH_MODE);
+        $result = $singleRow ? $stmt->fetch(self::FETCH_MODE) : $stmt->fetchAll(self::FETCH_MODE);
 
         $stmt->closeCursor();
 
         return $result;
     }
 
-    public function write(string $query, array $parameters): false|string
+    public function write(string $query, array $parameters = [], bool $returnLastInsertId = false): bool|string
     {
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($parameters);
-        $lastInsertId = $this->pdo->lastInsertId();
+        $lastInsertId = $returnLastInsertId ? $this->pdo->lastInsertId() : true;
 
         $stmt->closeCursor();
 

@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AbrahanZarza\Dbm\Test;
+namespace AbrahanZarza\Dbm\Test\Dsn;
 
-use AbrahanZarza\Dbm\ConnectionType;
-use AbrahanZarza\Dbm\DsnBuilder;
+use AbrahanZarza\Dbm\Connection\ConnectionType;
+use AbrahanZarza\Dbm\Dsn\DsnBuilder;
 use PHPUnit\Framework\TestCase;
 
+/** @group unit-tests */
 class DsnBuilderTest extends TestCase
 {
     private const string DB_HOST = 'host';
@@ -54,17 +55,15 @@ class DsnBuilderTest extends TestCase
             self::DB_HOST,
             self::DB_PORT,
             self::DB_DATABASE,
-            self::DB_CHARSET
         );
 
         self::assertEquals(
             sprintf(
-                '%s:host=%s;port=%s;dbname=%s;charset=%s',
+                '%s:host=%s;port=%s;dbname=%s',
                 ConnectionType::PGSQL->value,
                 self::DB_HOST,
                 self::DB_PORT,
-                self::DB_DATABASE,
-                self::DB_CHARSET
+                self::DB_DATABASE
             ),
             $result
         );

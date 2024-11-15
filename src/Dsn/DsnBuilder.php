@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AbrahanZarza\Dbm;
+namespace AbrahanZarza\Dbm\Dsn;
+
+use AbrahanZarza\Dbm\Connection\ConnectionType;
 
 final readonly class DsnBuilder
 {
@@ -17,32 +19,27 @@ final readonly class DsnBuilder
         string $database,
         string $charset = 'utf8mb4',
     ): string {
-        return self::buildFullDsn(ConnectionType::MYSQL, $host, $port, $database, $charset);
+        return sprintf(
+            '%s:host=%s;port=%s;dbname=%s;charset=%s',
+            ConnectionType::MYSQL->value,
+            $host,
+            $port,
+            $database,
+            $charset
+        );
     }
 
     public static function buildPgsqlDsn(
         string $host,
         int $port,
         string $database,
-        string $charset = 'utf8mb4',
-    ): string {
-        return self::buildFullDsn(ConnectionType::PGSQL, $host, $port, $database, $charset);
-    }
-
-    private static function buildFullDsn(
-        ConnectionType $type,
-        string $host,
-        int $port,
-        string $database,
-        string $charset = 'utf8mb4',
     ): string {
         return sprintf(
-            '%s:host=%s;port=%s;dbname=%s;charset=%s',
-            $type->value,
+            '%s:host=%s;port=%s;dbname=%s',
+            ConnectionType::PGSQL->value,
             $host,
             $port,
-            $database,
-            $charset
+            $database
         );
     }
 }

@@ -6,11 +6,14 @@ RUN apk --update add \
     alpine-sdk \
     openssl-dev \
     linux-headers \
+    postgresql-dev \
+    sqlite \
+    sqlite-dev \
     && rm -rf /var/cache/apk/*
 
 RUN pecl channel-update pecl.php.net
 
-RUN docker-php-ext-install pdo pdo_mysql
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql pdo_sqlite
 
 ENV TZ=${TZ}
 
