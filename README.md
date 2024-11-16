@@ -1,90 +1,126 @@
 # Dbm
-Esta herramienta provee de mecanismos para conectarse a una base de datos y realizar consultas de forma sencilla y cómoda, aportando todas las ventajas de la extensión [PHP PDO](https://www.php.net/manual/es/book.pdo.php). Actualmente, soporta conexiones con bases de datos MySQL, Postgres, SQLServer y SQLite.
 
-Fue creada para ser empleada en proyectos web sencillos, pero también se puede usar como la capa de base de datos de una aplicación web más compleja.
+![PHP](https://img.shields.io/badge/php-8.3-blue)
 
-## Instrucciones de uso
+This library provides mechanisms to connect to a database and perform queries easily and conveniently, leveraging all the advantages of the [PHP PDO](https://www.php.net/manual/es/book.pdo.php) extension. It currently supports connections with MySQL, Postgres, and SQLite databases.
 
-Instalamos la librería vía [composer](https://getcomposer.org/doc/) en nuestro proyecto:
+It was designed to be used in simple PHP projects but can also serve as the database layer for a more complex web application.
+
+## How to start
+
+Install it in your PHP project using [composer](https://getcomposer.org/doc/):
 ```
-composer require abrahan-zarza/dbm
-```
-
-Posteriormente, debemos que establecer los siguientes valores en las variables de entorno del proyecto:
-```
-$_ENV['DB'] = 'database_type';
-$_ENV['DB_HOST'] = 'address';
-$_ENV['DB_PORT'] = 'port';
-$_ENV['DB_USER'] = 'user';
-$_ENV['DB_PASSWORD'] = 'password';
-$_ENV['DB_NAME'] = 'database';
+composer require abrahanzarza/dbm
 ```
 
-O si lo prefieres, puedes crear un fichero `.env` en tu proyecto, con la siguiente estructura:
+With that you are ready to connect with your database.
+
+### MySQL database connection
 ```
-DB=database_type
-DB_HOST=address
-DB_PORT=port
-DB_USER=user
-DB_PASSWORD=password
-DB_NAME=database
+$dbm = Dbm::build(
+    ConnectionType $type,  //ConnectionType::MYSQL
+    string $host,
+    int $port,
+    string $user,
+    string $password,
+    string $database,
+    string $charset = 'utf8mb4',
+);
 ```
 
-Para más info de cómo cargar dicho fichero `.env` en tu aplicación, consultar la librería [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv).
+Example:
 
-### Instanciar una conexión
 ```
-$conn = \Dbm\Dbm::getInstance();
-```
-
-### Cerrar una conexión
-```
-$conn->destroy();
+$dbm = Dbm::build(ConnectionType::MYSQL, 'localhost', 3306, 'db_user', 'db_pass', 'database', 'latin1');
 ```
 
-### Método `executeS`
-Este método se usa para realizar consultas de las que necesitemos obtener múltiples registros de la base de datos, normalmente consultas SELECT.
+### PostgreSQL database connection
 ```
-executeS(string $query, array $bindParams = null, bool $destroyInstance = true)
-```
-
-### Método `getRow`
-Este otro método se usa para realizar consultas de las que necesitemos obtener un solo registro de la base de datos, como las consultas `SELECT`.
-```
-getRow(string $query, array $bindParams = null, bool $destroyInstance = true)
-```
-
-### Método `execute`
-Este método se usa para realizar consultas de las que no necesitamos extraer datos de la base de datos, es decir, operaciones como `INSERT`, `UPDATE` o `DELETE`.
-```
-execute(string $query, array $bindParams = null, bool $destroyInstance = true)
+$dbm = Dbm::build(
+    ConnectionType $type,  //ConnectionType::PGSQL
+    string $host,
+    int $port,
+    string $user,
+    string $password,
+    string $database,
+);
 ```
 
-## Parámetros
+Example:
 
-### `$query`
-Este parámetro es la consulta a base de datos.
-
-### `$bindParams`
-En el caso que la consulta requiera de valores dinámicos, se especifican como array asociativo, cuya clave sería el nombre del valor que necesitamos y el valor de dicha clave sería el valor a mostrar.
-
-### `$destroyInstance`
-Por defecto, cada vez que ejecutamos una consulta, la instancia de base de datos se cierra. En el caso de querer mantenerla abierta, haremos uso de este parámetro, pasando su valor como `TRUE`.
-
-## Ejemplos
-
-**Obtener un listado de usuarios:**
 ```
-$results = $conn->executeS('SELECT id, name FROM users');
+$dbm = Dbm::build(ConnectionType::PGSQL, 'localhost', 3306, 'db_user', 'db_pass', 'database');
 ```
 
-**Obtener un usuario concreto por su id:**
+### SQLite database connection
 ```
-$results = $conn->getRow('SELECT id, name FROM users WHERE id = :id', ['id' => 1]);
-```
-
-**Insertar un nuevo usuario:**
-```
-$lastInsertId = $conn->execute('INSERT INTO users (name, email) VALUES (:name, :email)', ['name' => 'John', 'email' => 'john@doe.com']);
+$dbm = Dbm::buildForSqlite(
+    string $dbFilePath,  //The database file location
+);
 ```
 
+Example:
+
+```
+$dbm = Dbm::buildForSqlite(__DIR__ . '/database.sqlite');
+```
+
+## How to use
+
+Once you have been connected successfully following the previous steps, you can work with your database.
+
+### The `read` method
+This method must be used for all **read operations** with your database, for example:
+```
+$result = $dbm->read('SELECT * FROM users');
+```
+>The `$result` variable contains an array with all records of the users table.
+
+#### Available parameters
+
+| Name        | Type   | Description                | Optional | Default value |
+|-------------|--------|----------------------------|----------|--------------|
+| $query      | string | The database query         | No       |              |
+| $parameters | array  | Bind params for your query | Yes      | [ ]          |
+| $singleRow | bool   | Returns only a single row  | Yes      | false        |
+
+### The `write` method
+This method must be used for all **write operations** with your database, for example:
+
+* Insert one user:
+```
+$dbm->write(
+    'INSERT INTO users (id, name) VALUES (:id, :name)',
+    [':id' => 2, ':name' => 'Jane']
+);
+```
+
+* Update the user:
+```
+$dbm->write(
+    'UPDATE users SET name = :name WHERE id = :id',
+    [':name' => 'Lorem', ':id' => 2]
+);
+```
+
+* Delete the user:
+```
+$dbm->write('DELETE FROM users WHERE id = :id', [':id' => 2]);
+```
+
+* Also, drop the _users_ table:
+```
+$dbm->write('DROP TABLE users');
+```
+
+#### Available parameters
+
+| Name        | Type   | Description                   | Optional | Default value |
+|-------------|--------|-------------------------------|----------|--------------|
+| $query      | string | The database query            | No       |              |
+| $parameters | array  | Bind params for your query    | Yes      | [ ]          |
+| $returnLastInsertId | bool   | Returns the last insertion ID | Yes      | false        |
+
+## Authors
+
+* [Abrahan Zarza](https://github.com/AbrahanZarza). The project creator and maintainer.
